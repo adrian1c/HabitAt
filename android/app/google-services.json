@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "278792266308",
+    "project_id": "habitat-2fec5",
+    "storage_bucket": "habitat-2fec5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278792266308:android:a62a577f0a624978a81211",
+        "android_client_info": {
+          "package_name": "com.example.habitat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "278792266308-lovva996tq9tr6arrqq1v9j67i4gce9g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.habitat",
+            "certificate_hash": "7bde2c47b0ba0523bc62425b291fb10a02d387a9"
+          }
+        },
+        {
+          "client_id": "278792266308-nvbn9amshdhj4c93bjf9pqsrs1f86mk0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDC5tfzmGwRkdjpnjQdGIKi32WyQBatd6c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "278792266308-nvbn9amshdhj4c93bjf9pqsrs1f86mk0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
