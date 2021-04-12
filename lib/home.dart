@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'signup.dart';
+import 'email_login.dart';
 
 class Home extends StatelessWidget {
   Home({this.uid});
@@ -25,7 +25,7 @@ class Home extends StatelessWidget {
                 auth.signOut().then((res) {
                   Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => SignUp()),
+                      MaterialPageRoute(builder: (context) => EmailLogIn()),
                       (Route<dynamic> route) => false);
                 });
               },
@@ -53,27 +53,25 @@ class _NavigateDrawerState extends State<NavigateDrawer> {
         children: <Widget>[
           UserAccountsDrawerHeader(
             accountEmail: FutureBuilder(
-                future: FirebaseDatabase.instance
-                    .reference()
-                    .child("Users")
-                    .child(widget.uid)
-                    .once(),
-                builder: (context, AsyncSnapshot<DataSnapshot> snapshot) {
+                future: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(widget.uid)
+                    .get(),
+                builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                   if (snapshot.hasData) {
-                    return Text(snapshot.data.value['email']);
+                    return Text(snapshot.data['email']);
                   } else {
                     return CircularProgressIndicator();
                   }
                 }),
             accountName: FutureBuilder(
-                future: FirebaseDatabase.instance
-                    .reference()
-                    .child("Users")
-                    .child(widget.uid)
-                    .once(),
-                builder: (context, AsyncSnapshot<DataSnapshot> snapshot) {
+                future: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(widget.uid)
+                    .get(),
+                builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                   if (snapshot.hasData) {
-                    return Text(snapshot.data.value['name']);
+                    return Text(snapshot.data['name']);
                   } else {
                     return CircularProgressIndicator();
                   }

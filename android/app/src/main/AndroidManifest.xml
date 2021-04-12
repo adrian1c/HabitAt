@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.habitat">
-   <application>
+   <application android:name="androidx.multidex.MultiDexApplication">
         android:label="habitat"
         android:icon="@mipmap/ic_launcher">
         <activity

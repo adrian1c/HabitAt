@@ -3,8 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:splashscreen/splashscreen.dart';
 
+import 'package:google_fonts/google_fonts.dart';
+
 import 'home.dart';
 import 'signup.dart';
+import 'email_login.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,23 +22,23 @@ class MyApp extends StatelessWidget {
       future: _initialization,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          print('uhh');
+          //TODO: Make error display
           return Container(
               child: Text('Ooops', textDirection: TextDirection.ltr));
         }
 
         if (snapshot.connectionState == ConnectionState.done) {
-          print('NICE');
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            title: 'Meet Up',
+            title: 'HabitAt',
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
             home: IntroScreen(),
           );
         }
-        print('LREIDS');
+
+        //TODO: Make loading screen
         return Container(
             child: Text(
           'Loading',
@@ -51,16 +54,23 @@ class IntroScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     User result = FirebaseAuth.instance.currentUser;
     return new SplashScreen(
-        navigateAfterSeconds: result != null ? Home(uid: result.uid) : SignUp(),
+        navigateAfterSeconds:
+            result != null ? Home(uid: result.uid) : EmailLogIn(),
         seconds: 5,
         title: new Text(
-          'Welcome To Meet up!',
-          style: new TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+          'SPLISH SPLASH',
+          style: GoogleFonts.roboto(
+            color: Colors.white,
+            letterSpacing: 15,
+            fontWeight: FontWeight.normal,
+            fontSize: 15.0,
+          ),
+          textAlign: TextAlign.center,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xff233141),
         styleTextUnderTheLoader: new TextStyle(),
         photoSize: 100.0,
         onClick: () => print("flutter"),
-        loaderColor: Colors.red);
+        loaderColor: Colors.white);
   }
 }
