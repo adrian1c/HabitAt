@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 
+import 'navigateDrawer.dart';
 import 'home.dart';
 
 class FriendPage extends StatefulWidget {
@@ -36,7 +37,7 @@ class _FriendPageState extends State<FriendPage> {
           Container(
             alignment: Alignment.center,
             width: width,
-            height: height * 0.25,
+            height: height * 0.2,
             decoration: BoxDecoration(
               color: Color(0xff233141),
               borderRadius: BorderRadius.only(

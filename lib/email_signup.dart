@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'home.dart';
 import 'email_login.dart';
+import 'runSession.dart';
 
 class EmailSignUp extends StatefulWidget {
   @override
@@ -323,6 +324,8 @@ class _EmailSignUpState extends State<EmailSignUp> {
   }
 
   void registerToFb() {
+    double totalDistance = 0.0;
+    List<RunSession> sessionList = [];
     firebaseAuth
         .createUserWithEmailAndPassword(
             email: emailController.text, password: passwordController.text)
@@ -331,6 +334,8 @@ class _EmailSignUpState extends State<EmailSignUp> {
         'email': emailController.text,
         'age': ageController.text,
         'name': nameController.text,
+        'sessions': sessionList,
+        'totalDistance': totalDistance,
       }).then((res) {
         isLoading = false;
         Navigator.pushReplacement(
