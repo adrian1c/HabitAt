@@ -15,13 +15,14 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final FirebaseFirestore db = FirebaseFirestore.instance;
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     final String uid = widget.uid;
     return Scaffold(
-      backgroundColor: Color(0xffFBCBCB),
       appBar: new AppBar(
         elevation: 0,
         backgroundColor: Color(0xffEC5E5E),
@@ -32,24 +33,50 @@ class _ProfilePageState extends State<ProfilePage> {
               fontSize: 20,
             )),
       ),
-      body: Column(
-        children: [
-          Container(
-            alignment: Alignment.center,
-            width: width,
-            height: height * 0.2,
-            decoration: BoxDecoration(
-              color: Color(0xffEC5E5E),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(70.0),
-                bottomRight: Radius.circular(70.0),
-              ),
-            ),
-            child: Text('Hello'),
-          ),
-        ],
-      ),
+      body: _buildHeader(width, height),
       drawer: NavigateDrawer(uid: uid),
     );
+  }
+
+  Column _buildHeader(double width, double height) {
+    return Column(children: <Widget>[
+      Container(
+          width: width,
+          height: height * 0.3,
+          child: Stack(children: <Widget>[
+            Container(
+              alignment: Alignment.center,
+              width: width,
+              height: height * 0.2,
+              decoration: BoxDecoration(
+                color: Color(0xffEC5E5E),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(36),
+                  bottomRight: Radius.circular(36),
+                ),
+              ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(0, 0, 0, height * 0.1),
+                child: Text('John Cena\n@notjohncenaatallnope',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                    )),
+              ),
+            ),
+            Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: height * 0.2,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ))
+          ]))
+    ]);
   }
 }
