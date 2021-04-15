@@ -17,6 +17,25 @@ class FriendPage extends StatefulWidget {
 class _FriendPageState extends State<FriendPage> {
   String uid;
   _FriendPageState({@required this.uid});
+
+  final FirebaseFirestore db = FirebaseFirestore.instance;
+
+  TextEditingController _searchController = TextEditingController();
+
+  String isSearched;
+  QuerySnapshot searchResult;
+
+  @override
+  void initState() {
+    super.initState();
+    isSearched = 'NoSearch';
+    _searchController.addListener(_searchTextChange);
+  }
+
+  _searchTextChange() {
+    setState(() => isSearched = 'Searching');
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -48,7 +67,12 @@ class _FriendPageState extends State<FriendPage> {
           ),
         ],
       ),
-      body: _buildHeader(width, height),
+      body: Column(
+        children: [
+          _buildHeader(width, height),
+          _buildBody(width, height, isSearched),
+        ],
+      ),
       drawer: NavigateDrawer(uid: uid),
     );
   }
@@ -112,19 +136,55 @@ class _FriendPageState extends State<FriendPage> {
                             children: [
                               Expanded(
                                 child: TextField(
-                                    decoration: InputDecoration(
-                                  hintText: 'Enter a username here',
-                                  hintStyle: GoogleFonts.sen(
-                                    color: Colors.grey[700],
+                                  textInputAction: TextInputAction.search,
+                                  decoration: InputDecoration(
+                                    hintText: 'Enter a username here',
+                                    hintStyle: GoogleFonts.sen(
+                                      color: Colors.grey[700],
+                                    ),
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
                                   ),
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                )),
+                                  controller: _searchController,
+                                  onSubmitted: (String value) {
+                                    if (value != null) {
+                                      db
+                                          .collection('users')
+                                          .where('email', isEqualTo: value)
+                                          .get()
+                                          .then((result) {
+                                        if (result.size > 0 &&
+                                            result.docs.first.id != uid) {
+                                          setState(() {
+                                            isSearched = 'Found';
+                                            searchResult = result;
+                                          });
+                                        } else {
+                                          setState(() {
+                                            isSearched = 'None';
+                                          });
+                                        }
+                                      }).catchError((onError) {
+                                        setState(() => isSearched = 'None');
+                                      });
+                                    }
+                                  },
+                                ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                                child: Icon(Icons.search),
-                              )
+                              _searchController.text.length > 0
+                                  ? Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          10, 0, 0, 0),
+                                      child: IconButton(
+                                          icon: Icon(Icons.cancel),
+                                          onPressed: () {
+                                            setState(() {
+                                              _searchController.text = '';
+                                              isSearched = 'NoSearch';
+                                            });
+                                          }),
+                                    )
+                                  : Container()
                             ],
                           ),
                         )),
@@ -132,5 +192,234 @@ class _FriendPageState extends State<FriendPage> {
                 ))
           ]))
     ]);
+  }
+
+  Widget _buildBody(double width, double height, String isSearched) {
+    if (isSearched == 'Found' && searchResult != null) {
+      String _resultId = searchResult.docs.first.id;
+      String _resultName = searchResult.docs.first['name'];
+      String _resultEmail = searchResult.docs.first['email'];
+      String _resultTotalDistance =
+          (searchResult.docs.first['totalDistance'] / 1000).toStringAsFixed(2);
+
+      Future checkRequestedOrFriend() async {
+        return FutureBuilder<QuerySnapshot>(
+            future: db
+                .collection('users')
+                .doc(_resultId)
+                .collection('friendReq')
+                .where('ReqFromID', isEqualTo: uid)
+                .get(),
+            builder: (context, snapshot) {
+              if (snapshot.data.docs.length == 0) {
+                return SizedBox(
+                  width: width * 0.1,
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    child: IconButton(
+                      icon: Icon(Icons.person_add),
+                      color: Colors.white,
+                      onPressed: () {
+                        db
+                            .collection('users')
+                            .doc(_resultId)
+                            .collection('friendReq')
+                            .add({
+                          'ReqFromID': uid,
+                        });
+                      },
+                    ),
+                  ),
+                );
+              } else if (snapshot.data.docs.length == 1) {
+                return SizedBox(
+                    width: width * 0.1,
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      child: Icon(Icons.pending),
+                    ));
+              } else {
+                return SizedBox(
+                    width: width * 0.1,
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      child: Icon(Icons.done),
+                    ));
+              }
+            });
+      }
+
+      return Container(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(40, 30, 40, 30),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Color(0xff233141),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            alignment: Alignment.center,
+            height: height * 0.15,
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: width * 0.2,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: width * 0.4,
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      child: RichText(
+                        text: TextSpan(
+                          text: '$_resultName',
+                          style: GoogleFonts.tajawal(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: '\n$_resultEmail',
+                            ),
+                            TextSpan(
+                              text: '\n$_resultTotalDistance KM',
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  checkRequestedOrFriend()
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (isSearched == 'None' || isSearched == 'Searching') {
+      return Expanded(
+        child: Container(
+          padding: EdgeInsets.fromLTRB(40, 30, 40, 30),
+          child: Text('No results found.'),
+        ),
+      );
+    }
+
+    return Expanded(
+      child: Container(
+        child: StreamBuilder(
+            stream: db
+                .collection('users')
+                .doc(uid)
+                .collection('friendsList')
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData)
+                return Container(
+                    alignment: Alignment.center, child: Text('Loading...'));
+
+              final documents = snapshot.data.docs;
+
+              return Column(
+                children: [
+                  Container(
+                      alignment: Alignment.centerLeft,
+                      padding: EdgeInsets.fromLTRB(40, 30, 40, 30),
+                      child: Text('${documents.length} friends')),
+                  Expanded(
+                    child: ListView.builder(
+                        itemCount: documents.length,
+                        itemBuilder: (context, index) {
+                          DocumentSnapshot document = documents[index];
+
+                          return FutureBuilder<DocumentSnapshot>(
+                              future: db
+                                  .collection('users')
+                                  .doc(document['friendId'])
+                                  .get(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasError) {
+                                  return Text('Something went wrong.');
+                                }
+
+                                if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  Map<String, dynamic> data =
+                                      snapshot.data.data();
+                                  return Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        40, 10, 40, 10),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Color(0xff233141),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10)),
+                                      ),
+                                      alignment: Alignment.center,
+                                      height: height * 0.15,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(15.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            SizedBox(
+                                              width: width * 0.2,
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: width * 0.4,
+                                              child: RichText(
+                                                text: TextSpan(
+                                                  text: '${data['name']}',
+                                                  style: GoogleFonts.tajawal(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 15,
+                                                  ),
+                                                  children: <TextSpan>[
+                                                    TextSpan(
+                                                      text:
+                                                          '\n${data['email']}',
+                                                    ),
+                                                    TextSpan(
+                                                      text:
+                                                          '\n${data['totalDistance']}',
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                return Text('');
+                              });
+                        }),
+                  ),
+                ],
+              );
+            }),
+      ),
+    );
   }
 }
